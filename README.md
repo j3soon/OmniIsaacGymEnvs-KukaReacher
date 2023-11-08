@@ -1,3 +1,258 @@
+# Kuka Reacher Reinforcement Learning Sim2Real Environment for Omniverse Isaac Gym/Sim
+
+This repository adds a KukaReacher environment based on [OmniIsaacGymEnvs](https://github.com/NVIDIA-Omniverse/OmniIsaacGymEnvs) (commit [cc1aab0](https://github.com/NVIDIA-Omniverse/OmniIsaacGymEnvs/tree/cc1aab0f904ade860fc0761d62edb6e706ab89ec)), and plan to include Sim2Real code to control a real-world [Kuka](https://www.kuka.com/en-us/products/robotics-systems/industrial-robots) with the policy learned by reinforcement learning in Omniverse Isaac Gym/Sim.
+
+The RL code in this branch is only tested on Linux using Isaac Sim 2023.1.0. The Sim2Real code isn't implemented yet.
+
+This repo is compatible with the following repositories:
+- [OmniIsaacGymEnvs-DofbotReacher](https://github.com/j3soon/OmniIsaacGymEnvs-DofbotReacher)
+- [OmniIsaacGymEnvs-UR10Reacher](https://github.com/j3soon/OmniIsaacGymEnvs-UR10Reacher)
+- [OmniIsaacGymEnvs-KukaReacher](https://github.com/j3soon/OmniIsaacGymEnvs-KukaReacher)
+
+## Preview
+
+![](docs/media/KukaKR120R2500ProReacher-Vectorized.gif)  
+(KukaKR120R2500Pro)
+
+## Installation
+
+Prerequisites:
+- Before starting, please make sure your hardware and software meet the [system requirements](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/requirements.html#system-requirements).
+- [Install Omniverse Isaac Sim 2023.1.0](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) (Must setup Cache and Nucleus)
+  - You may try out newer versions of Isaac Sim along with [their corresponding patch](https://github.com/j3soon/isaac-extended#conda-issue-on-linux), but it is not guaranteed to work.
+- Double check that Nucleus is correctly installed by [following these steps](https://github.com/j3soon/isaac-extended#nucleus).
+- Your computer & GPU should be able to run the Cartpole example in [OmniIsaacGymEnvs](https://github.com/NVIDIA-Omniverse/OmniIsaacGymEnvs)
+- (Optional) [Set up a Kuka](https://www.kuka.com/en-us/products/robotics-systems/industrial-robots) in the real world
+
+Make sure to install Isaac Sim in the default directory and clone this repository to the home directory. Otherwise, you will encounter issues if you didn't modify the commands below accordingly.
+
+We will use Anaconda to manage our virtual environment:
+
+1. Clone this repository and the patches repo:
+   - Linux
+     ```sh
+     cd ~
+     git clone https://github.com/j3soon/OmniIsaacGymEnvs-KukaReacher.git
+     git clone https://github.com/j3soon/isaac-extended.git
+     ```
+   - Windows
+     ```sh
+     cd %USERPROFILE%
+     git clone https://github.com/j3soon/OmniIsaacGymEnvs-KukaReacher.git
+     git clone https://github.com/j3soon/isaac-extended.git
+     ```
+2. Generate [instanceable](https://docs.omniverse.nvidia.com/isaacsim/latest/isaac_gym_tutorials/tutorial_gym_instanceable_assets.html) Kuka assets for training:
+
+   [Launch the Script Editor](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/tutorial_gui_interactive_scripting.html#script-editor) in Isaac Sim. Copy the content in `omniisaacgymenvs/utils/usd_utils/create_instanceable_${ROBOT_NAME_LOWER}_from_urdf.py` and execute it inside the Script Editor window. Wait until you see the text `Done!`.
+
+   The `${ROBOT_NAME_LOWER}` should be replaced with one of the following:
+   - `kukakr120r2500pro`
+
+   The URDF files in `/thirdparty/*` are provided by [ROS-Industrial](https://github.com/ros-industrial/kuka_experimental/tree/melodic-devel). The details on how to download this file can be found in the commit message of [fa39cbf](https://github.com/j3soon/OmniIsaacGymEnvs-KukaReacher/commit/fa39cbf37da53a7f96f3979b0a0a1f9e9a9cd103).
+
+3. [Download and Install Anaconda](https://www.anaconda.com/products/distribution#Downloads).
+   ```sh
+   # For 64-bit Linux (x86_64/x64/amd64/intel64)
+   wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
+   bash Anaconda3-2022.10-Linux-x86_64.sh
+   ```
+   For Windows users, make sure to use `Anaconda Prompt` instead of `Anaconda Powershell Prompt`, `Command Prompt`, or `Powershell` for the following commands.
+4. Patch Isaac Sim 2023.1.0
+   - Linux
+     ```sh
+     export ISAAC_SIM="$HOME/.local/share/ov/pkg/isaac_sim-2023.1.0"
+     cp $ISAAC_SIM/setup_python_env.sh $ISAAC_SIM/setup_python_env.sh.bak
+     cp ~/isaac-extended/isaac_sim-2023.1.0-patch/linux/setup_python_env.sh $ISAAC_SIM/setup_python_env.sh
+     ```
+   - Windows
+     > (To be updated)
+5. [Set up conda environment for Isaac Sim](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_python.html#advanced-running-with-anaconda)
+   - Linux
+     ```sh
+     # conda remove --name isaac-sim --all
+     export ISAAC_SIM="$HOME/.local/share/ov/pkg/isaac_sim-2023.1.0"
+     cd $ISAAC_SIM
+     conda env create -f environment.yml
+     conda activate isaac-sim
+     cd ~/OmniIsaacGymEnvs-KukaReacher
+     pip install -e .
+     ```
+   - Windows
+     > (To be updated)
+6. Activate conda environment
+   - Linux
+     ```sh
+     export ROBOT_NAME="KukaKR120R2500Pro"
+     export ROBOT_NAME_LOWER="kukakr120r2500pro"
+     export ISAAC_SIM="$HOME/.local/share/ov/pkg/isaac_sim-2023.1.0"
+     cd $ISAAC_SIM
+     conda activate isaac-sim
+     source setup_conda_env.sh
+     ```
+   - Windows
+     ```sh
+     set ROBOT_NAME="KukaKR120R2500Pro"
+     set ROBOT_NAME_LOWER="kukakr120r2500pro"
+     set ISAAC_SIM="%LOCALAPPDATA%\ov\pkg\isaac_sim-2023.1.0"
+     cd %ISAAC_SIM%
+     conda activate isaac-sim
+     call setup_conda_env.bat
+     ```
+
+Please note that you should execute the commands in Step 6 for every new shell.
+
+For Windows users, replace `~` to `%USERPROFILE%` for all the following commands.
+
+## Dummy Policy
+
+This is a sample to make sure you have setup the environment correctly. You should see a single Kuka in Isaac Sim.
+
+```sh
+cd ~/OmniIsaacGymEnvs-KukaReacher
+python omniisaacgymenvs/scripts/dummy_${ROBOT_NAME_LOWER}_policy.py task=${ROBOT_NAME}Reacher test=True num_envs=1
+```
+
+Alternatively, you can replace the dummy policy with a random policy with `omniisaacgymenvs/scripts/random_policy.py`.
+
+## Training
+
+You can launch the training in `headless` mode as follows:
+
+```sh
+cd ~/OmniIsaacGymEnvs-KukaReacher
+python omniisaacgymenvs/scripts/rlgames_train.py task=${ROBOT_NAME}Reacher headless=True
+```
+
+The number of environments is set to 2048 by default. If your GPU has small memory, you can decrease the number of environments by changing the arguments `num_envs` as below:
+
+```sh
+cd ~/OmniIsaacGymEnvs-KukaReacher
+python omniisaacgymenvs/scripts/rlgames_train.py task=${ROBOT_NAME}Reacher headless=True num_envs=2048
+```
+
+You can also skip training by downloading the pre-trained model checkpoint by:
+
+```sh
+cd ~/OmniIsaacGymEnvs-KukaReacher
+wget https://github.com/j3soon/OmniIsaacGymEnvs-KukaReacher/releases/download/v1.0.0/runs.zip
+unzip runs.zip
+```
+
+The learning curve of the pre-trained model:
+
+![](docs/media/KukaKR120R2500Pro-Learning-Curve.png)  
+(KukaKR120R2500Pro)
+
+## Testing
+
+Make sure you have stored the model checkpoints at `~/OmniIsaacGymEnvs-KukaReacher/runs`, you can check it with the following command:
+
+```sh
+ls ~/OmniIsaacGymEnvs-KukaReacher/runs/${ROBOT_NAME}Reacher/nn/
+```
+
+In order to achieve the highest rewards, you may not want to use the latest checkpoint `./runs/${ROBOT_NAME}Reacher/nn/${ROBOT_NAME}Reacher.pth`. Instead, use the checkpoint with highest rewards such as `./runs/${ROBOT_NAME}Reacher/nn/last_${ROBOT_NAME}Reacher_ep_1000_rew_XXX.pth`. You can replace `${ROBOT_NAME}Reacher.pth` with the latest checkpoint before following the steps below, or simply modify the commands below to use the latest checkpoint.
+
+You can visualize the learned policy by the following command:
+
+```sh
+cd ~/OmniIsaacGymEnvs-KukaReacher
+python omniisaacgymenvs/scripts/rlgames_train.py task=${ROBOT_NAME}Reacher test=True num_envs=512 checkpoint=./runs/${ROBOT_NAME}Reacher/nn/${ROBOT_NAME}Reacher.pth
+```
+
+Likewise, you can decrease the number of environments by modifying the parameter `num_envs=512`.
+
+## Sim2Real
+
+> (To be updated)
+
+## Demo
+
+We provide an interactable demo based on the `${ROBOT_NAME}Reacher` RL example. In this demo, you can click on any of
+the Kuka in the scene to manually control the robot with your keyboard as follows:
+
+- `Q`/`A`: Control Joint 0.
+- `W`/`S`: Control Joint 1.
+- `E`/`D`: Control Joint 2.
+- `R`/`F`: Control Joint 3.
+- `T`/`G`: Control Joint 4.
+- `Y`/`H`: Control Joint 5.
+- `ESC`: Unselect a selected Kuka and yields manual control
+
+Launch this demo with the following command. Note that this demo limits the maximum number of Kuka in the scene to 128.
+
+```sh
+cd ~/OmniIsaacGymEnvs-KukaReacher
+python omniisaacgymenvs/scripts/rlgames_demo.py task=${ROBOT_NAME}Reacher num_envs=64
+```
+
+## Running in Docker
+
+If you have a [NVIDIA Enterprise subscription](https://docs.omniverse.nvidia.com/prod_nucleus/prod_nucleus/enterprise/installation/planning.html), you can run all services with Docker Compose.
+
+For users without a subscription, you can pull the [Isaac Docker image](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/isaac-sim), but should still install Omniverse Nucleus beforehand. (only Isaac itself is dockerized)
+
+Follow [this tutorial](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_container.html#isaac-sim-setup-remote-headless-container) to generate your NGC API Key.
+
+Please note that you should clone this repositories in your home directory and generate instanceable assets beforehand as mentioned in the [Installation](#installation) section.
+
+We will now set up the docker environment.
+
+1. Build the docker image
+   ```sh
+   docker pull nvcr.io/nvidia/isaac-sim:2023.1.0-hotfix.1
+   docker build . -t j3soon/isaac-sim
+   ```
+2. Launch an Isaac Container in Headless mode:
+   ```sh
+   scripts/run_docker_headless.sh
+   ./runheadless.native.sh
+   ```
+   Alternatively, launch an Isaac Container with GUI (The host machine should include a desktop environment):
+   ```sh
+   scripts/run_docker.sh
+   ./runapp.sh
+   ```
+3. Install this repository
+   ```sh
+   cd ~/OmniIsaacGymEnvs-KukaReacher
+   pip install -e .
+   ```
+4. Run any command in the docker container
+
+   > Make sure to add `headless=True` if the container is launched in headless mode.
+
+   For an example, running the training script:
+
+   ```sh
+   cd ~/OmniIsaacGymEnvs-KukaReacher
+   python omniisaacgymenvs/scripts/rlgames_train.py task=${ROBOT_NAME}Reacher headless=True num_envs=2048
+   ```
+
+   You can watch the training progress with:
+
+   ```sh
+   docker exec -it isaac-sim /bin/bash
+   cd ~/OmniIsaacGymEnvs-KukaReacher
+   tensorboard --logdir=./runs
+   ```
+
+## Acknowledgement
+
+This project has been made possible through the support of [ElsaLab][elsalab] and [NVIDIA AI Technology Center (NVAITC)][nvaitc].
+
+For a complete list of contributors to the code of this repository, please visit the [contributor list](https://github.com/j3soon/OmniIsaacGymEnvs-KukaReacher/graphs/contributors).
+
+[![](docs/media/logos/elsalab.png)][elsalab]
+[![](docs/media/logos/nvaitc.png)][nvaitc]
+
+[elsalab]: https://github.com/elsa-lab
+[nvaitc]: https://github.com/NVAITC
+
+Disclaimer: this is not an official NVIDIA product.
+
+> **Note**: below are the original README of [OmniIsaacGymEnvs](https://github.com/NVIDIA-Omniverse/OmniIsaacGymEnvs).
+
 # Omniverse Isaac Gym Reinforcement Learning Environments for Isaac Sim
 
 ## About this repository
@@ -97,7 +352,7 @@ For more details on the extension workflow, please refer to the [documentation](
 
 ### Loading trained models // Checkpoints
 
-Checkpoints are saved in the folder `runs/EXPERIMENT_NAME/nn` where `EXPERIMENT_NAME` 
+Checkpoints are saved in the folder `runs/EXPERIMENT_NAME/nn` where `EXPERIMENT_NAME`
 defaults to the task name, but can also be overridden via the `experiment` argument.
 
 To load a trained checkpoint and continue training, use the `checkpoint` argument:
@@ -106,15 +361,15 @@ To load a trained checkpoint and continue training, use the `checkpoint` argumen
 PYTHON_PATH scripts/rlgames_train.py task=Ant checkpoint=runs/Ant/nn/Ant.pth
 ```
 
-To load a trained checkpoint and only perform inference (no training), pass `test=True` 
-as an argument, along with the checkpoint name. To avoid rendering overhead, you may 
+To load a trained checkpoint and only perform inference (no training), pass `test=True`
+as an argument, along with the checkpoint name. To avoid rendering overhead, you may
 also want to run with fewer environments using `num_envs=64`:
 
 ```bash
 PYTHON_PATH scripts/rlgames_train.py task=Ant checkpoint=runs/Ant/nn/Ant.pth test=True num_envs=64
 ```
 
-Note that if there are special characters such as `[` or `=` in the checkpoint names, 
+Note that if there are special characters such as `[` or `=` in the checkpoint names,
 you will need to escape them and put quotes around the string. For example,
 `checkpoint="runs/Ant/nn/last_Antep\=501rew\[5981.31\].pth"`
 
@@ -215,7 +470,7 @@ This script creates an instance of the PPO runner in `rl_games` and automaticall
 ### Configuration and command line arguments
 
 We use [Hydra](https://hydra.cc/docs/intro/) to manage the config.
- 
+
 Common arguments for the training scripts are:
 
 * `task=TASK` - Selects which task to use. Any of `AllegroHand`, `Ant`, `Anymal`, `AnymalTerrain`, `BallBalance`, `Cartpole`, `CartpoleCamera`, `Crazyflie`, `FactoryTaskNutBoltPick`, `FactoryTaskNutBoltPlace`, `FactoryTaskNutBoltScrew`, `FrankaCabinet`, `FrankaDeformable`, `Humanoid`, `Ingenuity`, `Quadcopter`, `ShadowHand`, `ShadowHandOpenAI_FF`, `ShadowHandOpenAI_LSTM` (these correspond to the config for each environment in the folder `omniisaacgymenvs/cfg/task`)
@@ -242,9 +497,9 @@ Hydra also allows setting variables inside config files directly as command line
 
 Default values for each of these are found in the `omniisaacgymenvs/cfg/config.yaml` file.
 
-The way that the `task` and `train` portions of the config works are through the use of config groups. 
+The way that the `task` and `train` portions of the config works are through the use of config groups.
 You can learn more about how these work [here](https://hydra.cc/docs/tutorials/structured_config/config_groups/)
-The actual configs for `task` are in `omniisaacgymenvs/cfg/task/<TASK>.yaml` and for `train` in `omniisaacgymenvs/cfg/train/<TASK>PPO.yaml`. 
+The actual configs for `task` are in `omniisaacgymenvs/cfg/task/<TASK>.yaml` and for `train` in `omniisaacgymenvs/cfg/train/<TASK>PPO.yaml`.
 
 In some places in the config you will find other variables referenced (for example,
  `num_actors: ${....task.env.numEnvs}`). Each `.` represents going one level up in the config hierarchy.
@@ -288,7 +543,7 @@ For more details on multi-node training with PyTorch, please visit [here](https:
 
 ## Tasks
 
-Source code for tasks can be found in `omniisaacgymenvs/tasks`. 
+Source code for tasks can be found in `omniisaacgymenvs/tasks`.
 
 Each task follows the frameworks provided in `omni.isaac.core` and `omni.isaac.gym` in Isaac Sim.
 
@@ -299,7 +554,7 @@ Full details on each of the tasks available can be found in the [RL examples doc
 
 ## Demo
 
-We provide an interactable demo based on the `AnymalTerrain` RL example. In this demo, you can click on any of 
+We provide an interactable demo based on the `AnymalTerrain` RL example. In this demo, you can click on any of
 the ANYmals in the scene to go into third-person mode and manually control the robot with your keyboard as follows:
 
 - `Up Arrow`: Forward linear velocity command

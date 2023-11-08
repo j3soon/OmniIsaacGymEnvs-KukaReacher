@@ -1,4 +1,5 @@
 # Copyright (c) 2018-2022, NVIDIA Corporation
+# Copyright (c) 2022-2023, Johnson Sun
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,10 +30,12 @@
 
 def initialize_demo(config, env, init_sim=True):
     from omniisaacgymenvs.demos.anymal_terrain import AnymalTerrainDemo
+    from omniisaacgymenvs.demos.kukakr120r2500pro_reacher import KukaKR120R2500ProReacherDemo
     
     # Mappings from strings to environments
     task_map = {
         "AnymalTerrain": AnymalTerrainDemo,
+        "KukaKR120R2500ProReacher": KukaKR120R2500ProReacherDemo,
     }
 
     from omniisaacgymenvs.utils.config_utils.sim_config import SimConfig
