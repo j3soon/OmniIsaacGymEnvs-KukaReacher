@@ -239,14 +239,16 @@ We will now set up the docker environment.
 
 ## Acknowledgement
 
-This project has been made possible through the support of [ElsaLab][elsalab] and [NVIDIA AI Technology Center (NVAITC)][nvaitc].
+This project has been made possible through the support of [ElsaLab][elsalab], [Raccoon][rccn], and [NVIDIA AI Technology Center (NVAITC)][nvaitc].
 
 For a complete list of contributors to the code of this repository, please visit the [contributor list](https://github.com/j3soon/OmniIsaacGymEnvs-KukaReacher/graphs/contributors).
 
 [![](docs/media/logos/elsalab.png)][elsalab]
+[![](docs/media/logos/rccn.png)][rccn]
 [![](docs/media/logos/nvaitc.png)][nvaitc]
 
 [elsalab]: https://github.com/elsa-lab
+[rccn]: http://rccn.dev/
 [nvaitc]: https://github.com/NVAITC
 
 Disclaimer: this is not an official NVIDIA product.
