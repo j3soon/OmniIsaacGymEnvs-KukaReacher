@@ -70,10 +70,23 @@ def create_kuka_from_urdf(urdf_path, usd_path, mesh_usd_path, instanceable_usd_p
         import_config=import_config, dest_path=instanceable_usd_path,
     )
 
+def create_block_indicator():
+    for suffix in ['', '_instanceable']:
+        asset_usd_path = f'omniverse://localhost/NVIDIA/Assets/Isaac/2023.1.0/Isaac/Props/Blocks/block{suffix}.usd'
+        block_usd_path = f'omniverse://localhost/Projects/J3soon/Isaac/2023.1.0/Isaac/Props/Blocks/block{suffix}.usd'
+        omni.client.copy(asset_usd_path, block_usd_path)
+        omni.usd.get_context().open_stage(block_usd_path)
+        stage = omni.usd.get_context().get_stage()
+        edits = Sdf.BatchNamespaceEdit()
+        edits.Add(Sdf.NamespaceEdit.Remove('/object/object/collisions'))
+        stage.GetRootLayer().Apply(edits)
+        omni.usd.get_context().save_stage()
+
 if __name__ == '__main__':
     kuka_urdf_path = f'{os.path.expanduser("~")}/OmniIsaacGymEnvs-KukaReacher/thirdparty/kuka_kr120_support/urdf/kr120r2500pro.urdf'
     kuka_usd_path = 'omniverse://localhost/Projects/J3soon/Isaac/2023.1.0/Isaac/Robots/Kuka/KR120_R2500_Pro/kr120r2500pro_urdf.usd'
     kuka_mesh_usd_path = 'omniverse://localhost/Projects/J3soon/Isaac/2023.1.0/Isaac/Robots/Kuka/KR120_R2500_Pro/kr120r2500pro_urdf_instanceable_meshes.usd'
     kuka_instanceable_usd_path = 'omniverse://localhost/Projects/J3soon/Isaac/2023.1.0/Isaac/Robots/Kuka/KR120_R2500_Pro/kr120r2500pro_urdf_instanceable.usd'
     create_kuka_from_urdf(kuka_urdf_path, kuka_usd_path, kuka_mesh_usd_path, kuka_instanceable_usd_path)
+    create_block_indicator()
     print("Done!")
