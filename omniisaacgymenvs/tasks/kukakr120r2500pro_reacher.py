@@ -86,6 +86,8 @@ class KukaKR120R2500ProReacherTask(ReacherTask):
 
         pi = math.pi
         # For actions
+        # The dof limits follow those defined in:
+        # thirdparty/kuka_kr120_support/urdf/kr120r2500pro.urdf
         self._dof_limits = torch.tensor([[
             [np.deg2rad(-185), np.deg2rad(185)],
             [np.deg2rad(-155), np.deg2rad(35)],
@@ -94,9 +96,6 @@ class KukaKR120R2500ProReacherTask(ReacherTask):
             [np.deg2rad(-130), np.deg2rad(130)],
             [np.deg2rad(-350), np.deg2rad(350)],
         ]], dtype=torch.float32, device=self._cfg["sim_device"])
-        # The last action space cannot be [0, 0]
-        # It will introduce the following error:
-        # ValueError: Expected parameter loc (Tensor of shape (2048, 6)) of distribution Normal(loc: torch.Size([2048, 6]), scale: torch.Size([2048, 6])) to satisfy the constraint Real(), but found invalid values
         self.useURDF = self._task_cfg["env"]["useURDF"]
 
         # Setup Sim2Real
